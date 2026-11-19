@@ -1,5 +1,3 @@
-"""Minimal in-process operational metrics exposed in Prometheus text format (no extra dependency)."""
-
 from __future__ import annotations
 
 import threading

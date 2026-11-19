@@ -1,9 +1,3 @@
-"""FlightOps ML inference API (FastAPI). Serves the registered MLflow model behind the `champion` alias.
-
-There is deliberately NO promotion/rollback endpoint: governance actions live in the admin CLI and the
-authenticated admin panel of the dashboard.
-"""
-
 from __future__ import annotations
 
 import time

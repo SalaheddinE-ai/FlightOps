@@ -1,5 +1,3 @@
-"""Page 1 - Executive Overview (Streamlit entry point)."""
-
 import sys
 from pathlib import Path
 
