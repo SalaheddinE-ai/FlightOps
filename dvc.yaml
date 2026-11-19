@@ -1,0 +1,25 @@
+# DVC pipeline. Track the raw dataset first:  dvc add data/raw/ai4i2020.csv
+stages:
+  validate:
+    cmd: python -m flightops_ml validate-data
+    deps:
+      - data/raw/ai4i2020.csv
+      - src/flightops_ml/data
+    outs:
+      - reports/evaluations/data_quality_report.json
+  train:
+    cmd: python -m flightops_ml train
+    deps:
+      - data/raw/ai4i2020.csv
+      - reports/evaluations/data_quality_report.json
+      - src/flightops_ml
+    params:
+      - configs/training.yaml:
+          - seed
+          - split
+          - features
+          - models
+          - tuning
+          - threshold
+    outs:
+      - reports/evaluations/latest_summary.json

@@ -1,0 +1,5 @@
+$ErrorActionPreference = "Stop"
+Set-Location (Split-Path $PSScriptRoot -Parent)
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe scripts\validate_configs.py
+.\.venv\Scripts\python.exe -m pytest --junitxml reports\junit.xml

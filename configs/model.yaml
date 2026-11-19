@@ -1,0 +1,24 @@
+# FlightOps ML - model governance configuration
+lifecycle:
+  statuses: [EXPERIMENTAL, VALIDATED, APPROVED, DEPLOYED, ARCHIVED]
+  aliases: {candidate: candidate, champion: champion}
+
+# Promotion gates. Floors are project defaults, not industry standards - tune them to your use case.
+gates:
+  min_pr_auc: 0.40
+  min_recall: 0.50
+  min_f1: 0.40
+  # Candidate vs. current champion, evaluated on the same fixed hold-out set:
+  min_pr_auc_improvement: 0.0     # candidate PR-AUC must be >= champion PR-AUC + this value
+  max_recall_regression: 0.02     # candidate recall may not fall more than this below the champion
+  require_smoke_test: true
+  require_data_validation: true
+
+risk:
+  # LOW < medium_fraction * threshold <= MEDIUM < threshold <= HIGH < critical_probability <= CRITICAL
+  medium_fraction_of_threshold: 0.5
+  critical_probability: 0.80
+
+serving:
+  champion_refresh_seconds: 30
+  max_batch_size: 1000

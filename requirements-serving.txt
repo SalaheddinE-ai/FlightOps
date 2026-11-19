@@ -1,0 +1,14 @@
+# Slim set for the inference API image (no Optuna / Streamlit / Pandera).
+pandas==3.0.2
+numpy==2.4.4
+scipy==1.17.1
+scikit-learn==1.8.0
+xgboost==3.4.1
+shap==0.54.1
+matplotlib==3.10.8
+pyyaml==6.0.3
+mlflow==3.17.2
+pydantic==2.14.1
+fastapi==0.159.1
+uvicorn[standard]==0.54.0
+httpx==0.28.1

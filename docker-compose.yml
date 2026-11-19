@@ -1,0 +1,68 @@
+# FlightOps ML - local platform.   docker compose up --build -d
+# Only the three user-facing ports are published; services talk over the internal network.
+name: flightops-ml
+
+x-app-env: &app-env
+  MLFLOW_TRACKING_URI: http://mlflow:5000
+  MLFLOW_UI_URL: http://localhost:5000
+  FLIGHTOPS_API_URL: http://api:8000
+  FLIGHTOPS_ARTIFACTS_DIR: /app/artifacts
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+services:
+  mlflow:
+    build: {context: ., dockerfile: docker/Dockerfile.mlflow}
+    image: flightops-mlflow:0.1.0
+    ports: ["5000:5000"]
+    volumes: [mlflow_data:/mlflow]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: {context: ., dockerfile: docker/Dockerfile.api}
+    image: flightops-api:0.1.0
+    ports: ["8000:8000"]
+    environment:
+      <<: *app-env
+      FLIGHTOPS_API_KEY: ${FLIGHTOPS_API_KEY:-}
+    volumes: [state:/app/artifacts]
+    depends_on: {mlflow: {condition: service_healthy}}
+    restart: unless-stopped
+
+  dashboard:
+    build: {context: ., dockerfile: docker/Dockerfile.dashboard}
+    image: flightops-dashboard:0.1.0
+    ports: ["8501:8501"]
+    environment:
+      <<: *app-env
+      FLIGHTOPS_API_KEY: ${FLIGHTOPS_API_KEY:-}
+      FLIGHTOPS_ADMIN_TOKEN: ${FLIGHTOPS_ADMIN_TOKEN:-}
+      FLIGHTOPS_DATASET: ${FLIGHTOPS_DATASET:-}
+    volumes:
+      - state:/app/artifacts
+      - ./data:/app/data
+      - ./reports:/app/reports
+    depends_on: {mlflow: {condition: service_healthy}, api: {condition: service_started}}
+    restart: unless-stopped
+
+  # Optional one-shot trainer:  docker compose --profile train run --rm trainer
+  trainer:
+    image: flightops-dashboard:0.1.0
+    profiles: ["train"]
+    environment:
+      <<: *app-env
+      FLIGHTOPS_DATASET: ${FLIGHTOPS_DATASET:-}
+    volumes:
+      - state:/app/artifacts
+      - ./data:/app/data
+      - ./reports:/app/reports
+    depends_on: {mlflow: {condition: service_healthy}}
+    command: ["python", "-m", "flightops_ml", "train"]
+
+volumes:
+  mlflow_data:
+  state:

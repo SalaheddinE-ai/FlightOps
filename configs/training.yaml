@@ -1,0 +1,70 @@
+# FlightOps ML - training configuration (all values are documented defaults, not tuned claims)
+seed: 42
+
+dataset:
+  name: ai4i2020
+  # Resolved by flightops_ml.config.Paths.dataset_path(); override with FLIGHTOPS_DATASET.
+  filename: ai4i2020.csv
+
+split:
+  train: 0.70
+  validation: 0.10
+  test: 0.20
+
+features:
+  # Engineered features (see src/flightops_ml/features/engineering.py for the justification of each).
+  engineered: [temp_diff, power_w, wear_torque]
+
+models:
+  # Order matters only for reporting. All three baselines are always evaluated.
+  enabled: [logistic_regression, random_forest, xgboost]
+  logistic_regression:
+    class_weight: balanced
+    max_iter: 2000
+    C: 1.0
+  random_forest:
+    n_estimators: 300
+    max_depth: null
+    min_samples_leaf: 2
+    class_weight: balanced_subsample
+  xgboost:
+    n_estimators: 600          # upper bound; early stopping on the validation set picks the real count
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.9
+    colsample_bytree: 0.9
+    min_child_weight: 1
+    gamma: 0.0
+    reg_alpha: 0.0
+    reg_lambda: 1.0
+    early_stopping_rounds: 40
+    # "auto" = negative/positive ratio computed on the TRAINING partition only; a number overrides it.
+    scale_pos_weight: auto
+
+tuning:
+  enabled: true
+  n_trials: 30
+  cv_folds: 5
+  metric: average_precision
+  timeout_seconds: null
+  log_trials_to_mlflow: true   # one nested MLflow run per Optuna trial
+
+threshold:
+  # default | best_f1 | recall_constrained | cost
+  strategy: best_f1
+  recall_target: 0.80
+  # Illustrative relative costs. Replace with real maintenance economics before using "cost".
+  cost_false_negative: 10.0
+  cost_false_positive: 1.0
+
+selection:
+  # Champion-candidate selection among the trained models uses VALIDATION metrics only.
+  primary_metric: val_pr_auc
+  tie_breaker: val_f1
+
+latency:
+  n_samples: 50
+
+mlflow:
+  experiment_name: flightops-predictive-maintenance
+  registered_model_name: flightops-failure-classifier

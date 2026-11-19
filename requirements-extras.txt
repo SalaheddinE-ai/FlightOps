@@ -1,0 +1,4 @@
+# Optional tooling. NOT exercised by the automated test-suite in this repository's initial build:
+# pin the versions you validate on your machine.
+dvc>=3.50
+evidently>=0.7        # optional HTML drift reports; the built-in PSI/KS drift engine works without it

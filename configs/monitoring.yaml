@@ -1,0 +1,21 @@
+drift:
+  psi_threshold: 0.20          # common rule of thumb (<0.1 stable, 0.1-0.2 moderate, >0.2 significant)
+  ks_alpha: 0.05
+  dataset_drift_share: 0.30    # share of drifted features that flags dataset-level drift
+  min_rows: 50                 # below this, drift is reported as "insufficient data"
+  bins: 10
+
+performance:
+  min_labels: 30               # do not report performance with fewer labelled predictions
+
+alerts:
+  missing_rate: 0.01
+  invalid_input_rate: 0.05
+  latency_p95_ms: 250
+  error_rate: 0.02
+
+simulation:
+  scenarios:
+    temperature_shift: {air_delta_k: 3.0, process_delta_k: 3.0}
+    torque_increase: {factor: 1.30}
+    tool_wear_shift: {delta_min: 40}
